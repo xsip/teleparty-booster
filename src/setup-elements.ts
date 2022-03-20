@@ -20,8 +20,8 @@ export const setupElements = (): void => {
     gifLoaderInputElement && gifLoaderInputElement.remove();
     !gifLoaderInputElement && setupGifLoaderInputElement();
 
-    // gifListElement && gifListElement.remove();
-    // !gifListElement && setupGifListElement();
+    gifListElement && gifListElement.remove();
+    !gifListElement && setupGifListElement();
 
     chatInputElement && (chatInputElement.oninput = null);
 }

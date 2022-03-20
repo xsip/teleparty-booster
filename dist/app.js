@@ -1,4 +1,25 @@
 (() => {
+  var __async = (__this, __arguments, generator) => {
+    return new Promise((resolve, reject) => {
+      var fulfilled = (value) => {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var rejected = (value) => {
+        try {
+          step(generator.throw(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+      step((generator = generator.apply(__this, __arguments)).next());
+    });
+  };
+
   // src/helper/element.helper.ts
   var querySelector = (selector) => {
     return document.querySelector(selector);
@@ -271,6 +292,10 @@
     presenceIndicatorElement.append(gifLoaderInputElement);
   };
   var gifListElement = querySelector(".gifList");
+  var setupGifListElement = () => {
+    gifListElement = document.createElement("div");
+    gifListElement.className = "gifList";
+  };
   var getMessageElements = () => {
     var _a;
     return [...(_a = document.querySelectorAll(".message-txt")) != null ? _a : []];
@@ -299,12 +324,88 @@
     !extensionStyleElement && setupExtensionStyleElement();
     gifLoaderInputElement && gifLoaderInputElement.remove();
     !gifLoaderInputElement && setupGifLoaderInputElement();
+    gifListElement && gifListElement.remove();
+    !gifListElement && setupGifListElement();
     chatInputElement && (chatInputElement.oninput = null);
+  };
+
+  // src/gif-loader.ts
+  var GifLoader = class {
+    constructor() {
+      this.addgifListElement = (giphyResponse) => {
+        let d = document.createElement("div");
+        d.className = "gifList";
+        const gifsForRender = giphyResponse.data.map((e) => {
+          const img = e.images.fixed_height_small;
+          return `<img src="${img.url}" width="${img.width}" width="${img.height}" class="gif-element" id="${e.id}"/>`;
+        });
+        d.innerHTML = gifsForRender.join("");
+        [...d.children].forEach((child) => {
+          child.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const img = e.target;
+            chatInputElement.value = `::<img src="${img.src}" width="${img.width}" width="${img.height}" class="gif-element" id="${e.id}"/>::`;
+          });
+        });
+        chatInputContainerElement.prepend(d);
+        return d;
+      };
+      this.addTenorListElement = (tenorResponse) => {
+        var _a;
+        let d = document.createElement("div");
+        d.className = "gifList";
+        const gifsForRender = tenorResponse.results.map((e) => {
+          var _a2;
+          const img = (_a2 = e.media[0]) == null ? void 0 : _a2.tinygif;
+          return `<img src="${img.url}" width="${img.dims[0]}" width="${img.dims[1]}" class="gif-element" id="${e.id}"/>`;
+        });
+        d.innerHTML = gifsForRender.join("");
+        [...d.children].forEach((child) => {
+          child.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const img = e.target;
+            chatInputElement.value = `::<img src="${img.src}" width="${img.width}" width="${img.height}" class="gif-element" id="${e.id}"/>::`;
+          });
+        });
+        (_a = chatInputContainerElement) == null ? void 0 : _a.prepend(d);
+        return d;
+      };
+    }
+    setup() {
+      gifLoaderInputElement.onkeydown = (event) => __async(this, null, function* () {
+        var _a;
+        event.stopPropagation();
+        if (event.key !== "Enter") {
+          return;
+        }
+        const target = event.target;
+        if (!target) {
+          return;
+        }
+        if (!!!target.value) {
+          (_a = this.currentList) == null ? void 0 : _a.remove();
+          return;
+        }
+        yield this.searchForGifTenor(target.value);
+      });
+    }
+    searchForGifTenor(searchFor) {
+      return fetch("https://g.tenor.com/v1/search?q=" + searchFor + "&key=LIVDSRZULELA&limit=8").then((response) => response.json()).then((data) => {
+        this.currentList = this.addTenorListElement(data);
+      });
+    }
+    searchForGifGiphy(searchFor) {
+      return fetch("https://api.giphy.com/v1/gifs/search?limit=20&api_key=dc6zaTOxFJmzC&q=" + searchFor).then((response) => response.json()).then((data) => {
+        this.currentList = this.addgifListElement(data);
+      });
+    }
   };
 
   // src/index.ts
   setupElements();
   setTimeout(() => {
+    const gifLoader = new GifLoader();
+    gifLoader.setup();
     EmojiMapper.register();
     console.log("setup done!");
     chatHistoryElement.addEventListener("DOMNodeInserted", () => {

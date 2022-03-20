@@ -8,7 +8,7 @@ export class GifLoader {
     }
 
     currentList?: HTMLDivElement;
-    addToDom(): void {
+    setup(): void {
         // @ts-ignore
         gifLoaderInputElement.onkeydown = async (event: KeyboardEvent) => {
             event.stopPropagation();

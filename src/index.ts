@@ -6,8 +6,8 @@ import {chatHistoryElement, getMessageElements} from './definitions/elements';
 setupElements();
 
 setTimeout(() => {
-    const gifLoader = new GifLoader();
-    gifLoader.addToDom();
+    // const gifLoader = new GifLoader();
+    // gifLoader.setup();
     EmojiMapper.register();
 
     console.log('setup done!');

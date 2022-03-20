@@ -5,7 +5,7 @@ export class EmojiMapper {
     public static register() {
 
         // @ts-ignore
-        chatInputElement.oninput = function (event: InputEvent) {
+        /*chatInputElement.oninput = function (event: InputEvent) {
             const target: HTMLInputElement | null = (event.target as HTMLInputElement);
             if(!target) {
                 return;
@@ -14,7 +14,7 @@ export class EmojiMapper {
                 const regex = new RegExp(EmojiMapper.escapeSpecialChars(i), "gim");
                 target.value = target.value = target.value.replace(regex, emojiMap[i]);
             }
-        };
+        };*/
 
         [...emojiListElement.children].forEach((child: Element) => {
             (child as HTMLParagraphElement).addEventListener("click", (e: MouseEvent) => {
